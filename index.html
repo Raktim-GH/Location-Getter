@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Location Form</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(120deg, #749ae0, #1d3c72);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: white;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    .card {
+      display: none;
+      width: 100%;
+      max-width: 460px;
+      background: rgba(88, 39, 39, 0.5);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      padding: 35px 30px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      animation: slideUp 0.7s ease;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      font-size: 24px;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 14px 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      outline: none;
+      appearance: none;
+    }
+
+    .input-group label {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 14px;
+      color: #ddd;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label,
+    .input-group select:focus + label,
+    .input-group select:not([value=""]) + label {
+      top: -8px;
+      left: 10px;
+      font-size: 11px;
+      color: #00e0ff;
+      background: #2a5298;
+      padding: 0 5px;
+      border-radius: 3px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background-color: #00c6ff;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #008fd1;
+    }
+
+    #status {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 25px 20px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+
+    #permission-block {
+      position: absolute;
+      background: #0b0b0b;
+      color: white;
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="permission-block">🔒 Please allow location access to use this service.</div>
+
+  <div class="card" id="form-card">
+    <h2>📍 Share Your Location</h2>
+    <form id="locationForm">
+      <div class="input-group">
+        <input type="text" id="name" name="name" required placeholder=" " />
+        <label for="name">Full Name</label>
+      </div>
+
+      <div class="input-group">
+        <input type="email" id="email" name="email" required placeholder=" " />
+        <label for="email">Email Address</label>
+      </div>
+
+      <div class="input-group">
+        <input type="tel" id="phone" name="phone" required placeholder=" " />
+        <label for="phone">Phone Number</label>
+      </div>
+
+      <div class="input-group">
+        <input type="number" id="age" name="age" required placeholder=" " min="1" />
+        <label for="age">Age</label>
+      </div>
+
+      <div class="input-group">
+        <select id="sex" name="sex" required>
+          <option value="" disabled selected hidden></option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <label for="sex">Sex</label>
+      </div>
+
+      <input type="hidden" id="latitude" name="latitude" />
+      <input type="hidden" id="longitude" name="longitude" />
+
+      <button type="submit">Submit</button>
+    </form>
+    <p id="status">🔄 Detecting your location...</p>
+  </div>
+
+ <script>
+  window.onload = function () {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function (position) {
+          document.getElementById("latitude").value = position.coords.latitude;
+          document.getElementById("longitude").value = position.coords.longitude;
+          document.getElementById("status").innerText = "✅ Location detected. Ready to submit.";
+          document.getElementById("permission-block").style.display = "none";
+          document.getElementById("form-card").style.display = "block";
+        },
+        function () {
+          document.getElementById("permission-block").innerText = "❌ You must allow location access to use this service.";
+        }
+      );
+    } else {
+      document.getElementById("permission-block").innerText = "❌ Geolocation not supported.";
+    }
+  };
+
+  document.getElementById("locationForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const age = document.getElementById("age").value;
+    const sex = document.getElementById("sex").value;
+    const latitude = document.getElementById("latitude").value;
+    const longitude = document.getElementById("longitude").value;
+
+    if (!latitude || !longitude) {
+      document.getElementById("status").innerText = "⚠️ Location not available.";
+      return;
+    }
+
+    const data = `name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&age=${age}&sex=${sex}&latitude=${latitude}&longitude=${longitude}`;
+
+    fetch("https://script.google.com/macros/s/AKfycby5uKaq9cLOfw387GiZJYTMJ_3Unk5J2YRm9HscjHoMngkB7i9XkuxLLdeHAIL9hlyQDQ/exec", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: data
+    })
+      .then(response => response.text())
+      .then(data => {
+        if (data.includes("Success")) {
+          window.location.href = "thankyou.html";  // Make sure you create this page
+        } else {
+          document.getElementById("status").innerText = "❌ Submission failed.";
+        }
+      })
+      .catch(error => {
+        document.getElementById("status").innerText = "❌ Network error. Try again.";
+        console.error("Error:", error);
+      });
+  });
+</script>
+
+</body>
+</html>
